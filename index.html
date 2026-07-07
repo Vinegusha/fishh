@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>сияющее озеро</title>
+  <style>
+    :root {
+      --bg: #000;
+      --panel: rgba(18, 18, 24, 0.92);
+      --panel-2: rgba(255, 255, 255, 0.06);
+      --text: #f5f7ff;
+      --muted: rgba(245, 247, 255, 0.72);
+      --accent: #86f5ff;
+      --accent-2: #b56bff;
+      --danger: #ff6b8a;
+      --success: #7dffb2;
+      --shadow: 0 0 24px rgba(134, 245, 255, 0.18), 0 0 60px rgba(181, 107, 255, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(134, 245, 255, 0.12), transparent 35%),
+        radial-gradient(circle at 50% 80%, rgba(181, 107, 255, 0.10), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(920px, 100%);
+      display: grid;
+      gap: 20px;
+      justify-items: center;
+    }
+
+    .title {
+      text-align: center;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: 0.02em;
+      margin: 0;
+      text-shadow: 0 0 18px rgba(134, 245, 255, 0.35);
+    }
+
+    .subtitle {
+      margin: -10px 0 0;
+      color: var(--muted);
+      text-align: center;
+      max-width: 680px;
+      font-size: 0.98rem;
+    }
+
+    .hero-card {
+      width: min(100%, 680px);
+      padding: 18px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-image {
+      width: 100%;
+      height: min(52vw, 420px);
+      border-radius: calc(var(--radius) - 8px);
+      object-fit: contain;
+      object-position:center;
+      padding:12px;
+      display: block;
+      background: linear-gradient(135deg, rgba(134, 245, 255, 0.18), rgba(181, 107, 255, 0.10));
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .controls {
+      width: min(100%, 420px);
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .button {
+      width: 100%;
+      padding: 16px 22px;
+      border: 0;
+      border-radius: 18px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #061018;
+      background: linear-gradient(90deg, var(--accent), #c8ffff);
+      box-shadow: 0 0 18px rgba(134, 245, 255, 0.35);
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+    }
+
+    .button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
+    .button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+    .button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      filter: grayscale(0.2);
+      box-shadow: none;
+    }
+
+    .timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 1.1rem;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hint {
+      color: rgba(245, 247, 255, 0.5);
+      font-size: 0.92rem;
+      text-align: center;
+      max-width: 540px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .modal {
+      width: min(92vw, 560px);
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(25,25,34,0.98), rgba(10,10,14,0.98));
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 0 40px rgba(134,245,255,0.16), 0 0 100px rgba(181,107,255,0.12);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal::before {
+      content: "";
+      position: absolute;
+      inset: -40% -10% auto;
+      height: 220px;
+      background: radial-gradient(circle, rgba(134,245,255,0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .modal-title {
+      margin: 0 0 14px;
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      text-align: center;
+      text-shadow: 0 0 16px rgba(134,245,255,0.18);
+    }
+
+    .result-image {
+      width: 100%;
+      height: min(44vw, 300px);
+      object-fit: contain;
+      object-position:center;
+      padding:12px;
+      display: block;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(134,245,255,0.12), rgba(181,107,255,0.08));
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 14px;
+    }
+
+    .result-text {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .result-name {
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .close-btn {
+      margin-top: 18px;
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 0;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.9rem;
+    }
+
+    .glow {
+      text-shadow: 0 0 10px rgba(134, 245, 255, 0.3), 0 0 20px rgba(181, 107, 255, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1 class="title glow">сияющее озеро</h1>
+    <p class="subtitle">
+      Пора испытать свой навык рыболовства и работы в команде. Давайте выловим как можно больше крутой рыбы!
+    </p>
+
+    <section class="hero-card">
+      <!-- ВСТАВЬТЕ СЮДА ССЫЛКУ НА СВОЮ КАРТИНКУ -->
+      <img
+        class="hero-image"
+        id="heroImage"
+        src="https://i.ibb.co/jvG5KXPT/713312fe6ebf74c026006d17748c5583.gif"
+        alt="Главная картинка озера"
+      />
+    </section>
+
+    <section class="controls">
+      <button id="fishBtn" class="button" disabled>забросить удочку</button>
+      <div id="timer" class="timer">00:00</div>
+      <div class="badge">Вы можете выловить что-то раз в 40 минут</div>
+    </section>
+
+    <p class="hint">
+      Не забудьте сфотографировать улов и отправить в специальный раздел чата с рыбой. Напишите название своей команды под фото!
+    </p>
+  </main>
+
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 id="modalTitle" class="modal-title">Ого! Ты выловил..</h2>
+      <!-- ВСТАВЬТЕ СЮДА ССЫЛКУ НА КАРТИНКУ ВЫЛОВЛЕННОГО ПРЕДМЕТА -->
+      <img
+        id="resultImage"
+        class="result-image"
+        src="https://via.placeholder.com/1200x800?text=Result+Image+Here"
+        alt="Картинка выловленной добычи"
+      />
+      <div id="resultText" class="result-text"></div>
+      <button id="closeModal" class="close-btn">закрыть</button>
+    </div>
+  </div>
+
+  <script>
+    // =============================
+    // НАСТРОЙКА ШАБЛОНОВ
+    // =============================
+    // Заменяйте image у каждой добычи на свою ссылку.
+    // text — это короткая подпись, которую вы хотите показывать.
+
+    const LOOT_TABLE = [
+      { category: "trash", weight: 45, items: [
+        { name: "Рыба сорвалась!", text: "Не повезло! Наверняка это гадкий Кролик вам помешал >:( (0 очков)", image: "https://i.ibb.co/Tqb5ccK6/IMG-20260707-132558.jpg" },
+        { name: "Водоросль", text: "Зелёная и склизкая. И вонючая (0 очков)", image: "https://i.ibb.co/5xRMk73V/IMG-20260707-123135-918.png" }
+      ]},
+      { category: "medium", weight: 25, items: [
+        { name: "Анчоус", text: "Такой рыбёшкой разве что мышку накормишь (1 очко)", image: "https://i.ibb.co/PZ2k1dWR/IMG-20260707-123128-607.png" },
+        { name: "Утопленое любовное письмо", text: "Это почерк Чешира? Как это сюда попало?? (0 очков, но что если отдать это Кролику или Чеширу?..)", image: "https://i.ibb.co/p60t050d/IMG-20260707-123134-335.png" }
+      ]},
+      { category: "good", weight: 18, items: [
+        { name: "Сомик", text: "Смешная рыбка с усами. Съедобная (2 очка)", image: "https://i.ibb.co/nNDCVLWH/IMG-20260707-123131-556.png" },
+        { name: "Карп", text: "Вы помните эту рыбу! Вы вылавливали её в реке на родных землях (3 очка)", image: "https://i.ibb.co/qLWKmx1M/IMG-20260707-123133-138.png" }
+      ]},
+      { category: "excellent", weight: 10, items: [
+        { name: "Морской огурец", text: "Его продолговатая форма вызывает у вас апатию (4 очка)", image: "https://i.ibb.co/7t62YZF6/IMG-20260707-123126-370.png" },
+        { name: "Гейская форель", text: "Не трогай её руками! Кто знает что с тобой произодёт.. (5 очков)", image: "https://i.ibb.co/RTFvcJT4/IMG-20260707-123130-429.png" }
+      ]},
+      { category: "luck", weight: 2, items: [
+        { name: "Иглобрюх!!", text: "Круглый колючий шарик. У стоящего рядом Чешира отвисла Челюсть. Жулик! Как ты выловил такую редкую рыбу?! (30 очков)", image: "https://i.ibb.co/DHj80Jg7/IMG-20260707-123124-575.png" }
+      ]}
+    ];
+
+    const COOLDOWN_MS = 40 * 60 * 1000;
+    const STORAGE_KEY = "lake_fortune_next_available_at";
+const ATTEMPTS_KEY="lake_attempts";
+const PITY_KEY="lake_pity";
+
+    const fishBtn = document.getElementById("fishBtn");
+    const timerEl = document.getElementById("timer");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const closeModal = document.getElementById("closeModal");
+    const resultText = document.getElementById("resultText");
+    const resultImage = document.getElementById("resultImage");
+
+    function getNextAvailableAt() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const value = raw ? Number(raw) : 0;
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function setNextAvailableAt(timestamp) {
+      localStorage.setItem(STORAGE_KEY, String(timestamp));
+    }
+
+    
+function getAttempts(){return Number(localStorage.getItem(ATTEMPTS_KEY)||0);}
+function addAttempt(){localStorage.setItem(ATTEMPTS_KEY,getAttempts()+1);}
+
+function formatTime(ms) {
+      const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function weightedPick(table) {
+ const attempts=getAttempts();
+ const pity=Number(localStorage.getItem(PITY_KEY)||0);
+ let modified=JSON.parse(JSON.stringify(table));
+ if(attempts<3){modified=modified.filter(g=>g.category!=="luck");}
+ for(const g of modified){
+   if(g.category==="trash") g.weight=Math.max(10,g.weight-pity*2);
+   if(g.category==="medium") g.weight+=pity;
+   if(g.category==="good") g.weight+=pity;
+   if(g.category==="excellent") g.weight+=pity*0.8;
+   if(g.category==="luck") g.weight+=pity*0.25;
+ }
+ const total=modified.reduce((s,g)=>s+g.weight,0);
+ let roll=Math.random()*total;
+ for(const g of modified){
+   roll-=g.weight;
+   if(roll<=0){
+     const item=g.items[Math.floor(Math.random()*g.items.length)];
+     localStorage.setItem(PITY_KEY,g.category==="trash"?pity+1:0);
+     return {group:g.category,...item};
+   }
+ }
+ return {group:modified[0].category,...modified[0].items[0]};
+}
+function updateUI() {
+      const now = Date.now();
+      const nextAt = getNextAvailableAt();
+      const remaining = nextAt - now;
+
+      if (remaining > 0) {
+        fishBtn.disabled = true;
+        timerEl.textContent = formatTime(remaining);
+      } else {
+        fishBtn.disabled = false;
+        timerEl.textContent = "00:00";
+      }
+    }
+
+    function openResultModal(result) {
+      document.getElementById("modalTitle").textContent = "Ого! Ты выловил..";
+      resultImage.src = result.image;
+      resultImage.alt = result.name;
+      resultText.innerHTML = `
+        <span class="result-name">${result.name}</span><br>
+        ${result.text}
+      `;
+      modalBackdrop.style.display = "flex";
+    }
+
+    fishBtn.addEventListener("click", () => {
+      if (fishBtn.disabled) return;
+
+      const result = weightedPick(LOOT_TABLE);
+      addAttempt();
+      const nextAt = Date.now() + COOLDOWN_MS;
+      setNextAvailableAt(nextAt);
+      updateUI();
+      openResultModal(result);
+    });
+
+    closeModal.addEventListener("click", () => {
+      modalBackdrop.style.display = "none";
+    });
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) modalBackdrop.style.display = "none";
+    });
+
+    // Первый заход: если кулдаун не установлен, кнопка активна и таймер 00:00.
+    updateUI();
+    setInterval(updateUI, 1000);
+  </script>
+</body>
+</html>
